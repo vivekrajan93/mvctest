@@ -1,33 +1,21 @@
 trigger:
-- main
+- main  # Change this to your default branch if not 'main'
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
-# Step 1: Restore NuGet packages
-- task: NuGetToolInstaller@1
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'Build project'
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+- script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+  displayName: 'Publish project'
 
-# Step 2: Build the solution
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl="$(build.artifactstagingdirectory)\WebApp"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-# Step 3: Publish the artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)\WebApp'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
-    publishLocation: 'Container'
+    publishLocation: 'Container'
