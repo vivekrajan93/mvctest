@@ -1,0 +1,21 @@
+trigger:
+- main   # Change this to your default branch name if different
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'Build project'
+
+- script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+  displayName: 'Publish project'
+
+- task: PublishBuildArtifacts@1
+inputs:
+PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+ArtifactName: 'drop'
+publishLocation: 'Container'
